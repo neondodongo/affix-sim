@@ -1,13 +1,16 @@
 body {
     background-color: #4b7582;
     text-shadow: 0.7px 1.4px teal;
+    font-family: 'Saira Condensed', sans-serif;
 }
 select {
     width: 160px;
 }
 
-tr {
+tr{
     font-size: 20px;
+    border-bottom: solid;
+    border-color: #2a8299;
 }
 
 
@@ -50,7 +53,7 @@ tr {
 
 
 .btn {
-    border-radius: 0;
+    border-radius: 0.5;
 }
 
 .equipment-header {
@@ -82,6 +85,10 @@ tr {
     padding-left: 35px;
     padding-right: 35px;
     float:left;
+}
+
+.table{
+    min-width: 100%;
 }
 
 #base, #e1, #e2, #e3, #e4, #e5 {

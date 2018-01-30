@@ -1,7 +1,268 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org/">
 <head>
+    <script th:fragment='affix-scripts' th:inline="javascript">
+    //<![CDATA[
 
+    var abilities = [[${abilities}]];
+    var stage = [[${stage.equipment}]];
+
+    $(document).ready(function(){
+
+
+        $("#basic, #special, #soul, #resist, #status, #other").dblclick(function() {
+
+            // Get selected ability
+            var abilityTypeElement = document.getElementById(this.id);
+            var selectedAbilityId = abilityTypeElement.options[abilityTypeElement.selectedIndex].value;
+            var selectedAbility = abilities[selectedAbilityId - 1];
+
+            console.log("Selected: " + selectedAbility.name);
+
+            // Set current equipment
+            var currentEquipment = stage[intEquipId];
+            var currentAbilities = currentEquipment.abilities;
+
+            if (!currentAbilities.includes(selectedAbility)) {
+
+                if (currentEquipment.slots > 0) {
+
+                    for(i=0; i<currentAbilities.length; i++) {
+                        var switchable = false;
+
+                        if (currentAbilities[i].abilityType == selectedAbility.abilityType) {
+
+                            var currentType = selectedAbility.abilityType;
+
+                            // Special replacement cases
+                            if (currentType == "special") {
+
+                                if ((selectedAbility.name.includes("Modulator") || selectedAbility.name.includes("Vinculum") || selectedAbility.name.includes("ARKS MAX")) &&
+                                    (currentAbilities[i].name.includes("Modulator") || currentAbilities[i].name.includes("Vinculum") || currentAbilities[i].name.includes("ARKS MAX")))
+                                {
+                                        switchable = true;
+                                        break;
+                                }
+                                else if ((selectedAbility.name.includes("Boost") || selectedAbility.name.includes("Noble") || selectedAbility.name.includes("Elegant")) &&
+                                         (currentAbilities[i].name.includes("Boost") || currentAbilities[i].name.includes("Noble") || currentAbilities[i].name.includes("Elegant")))
+                                {
+                                    switchable = true;
+                                    break;
+                                }
+                                else if (selectedAbility.name.includes("Factor") && currentAbilities[i].name.includes("Factor")) {
+                                    switchable = true;
+                                    break;
+                                }
+                                else if (selectedAbility.name.includes("Reverie") && currentAbilities[i].name.includes("Reverie")) {
+                                    switchable = true;
+                                    break;
+                                }
+                                else if ((selectedAbility.name.includes("Flict") || selectedAbility.name.includes("Alter")) &&
+                                         (currentAbilities[i].name.includes("Flict") || currentAbilities[i].name.includes("Alter")))
+                                {
+                                    switchable = true;
+                                    break;
+                                }
+                            }
+                            else if (currentType == "soul" || currentType == "fever") {
+                                switchable = true;
+                                break;
+                            }
+                            else {
+                                var splitSelected = selectedAbility.name.split(" ");
+                                var splitCurrent = currentAbilities[i].name.split(" ");
+
+                                if (splitSelected[0] == splitCurrent[0]) {
+                                    switchable = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                    } //end for
+
+                        if (switchable) {
+                            currentAbilities[i] = selectedAbility;
+                            // renders ability name to corresponding equipment
+                            $("#" + currentAbilities.indexOf(selectedAbility) + "-" + strEquipId).text(selectedAbility.name);
+                        }
+                        else {
+                            if (currentEquipment.slots < 8) {
+                                currentAbilities.push(selectedAbility);
+                                $("#" + currentAbilities.indexOf(selectedAbility) + "-" + strEquipId).text(selectedAbility.name);
+                                currentEquipment.slots++;
+                            }
+                            else {
+                                console.log("Maximum slots allotted: " + currentEquipment.length)
+                            }
+                        }
+                }
+                else {
+                    currentAbilities.push(selectedAbility);
+                    $("#" + currentAbilities.indexOf(selectedAbility) + "-" + strEquipId).text(selectedAbility.name);
+                    currentEquipment.slots++;
+                }
+            }
+            console.log(currentEquipment);
+        });
+
+        $("#affix-header").click(function() {
+
+            if (affixing) {
+
+                var abilityMap = {};
+                var soulMap = {};
+                var ready = false;
+
+                for (i=1; i<stage.length; i++) {
+                    if (stage[0].slots > 0) {
+                        if (stage[0].slots <= stage[i].slots || stage[i].slots == 0) {
+                            ready = true;
+                            continue;
+                        }
+                        else {
+                            console.log("Cannot Affix...");
+                            ready = false;
+                            break;
+                        }
+                    }
+                    else if (stage[0].slots == 0) {
+                        if (stage[i].slots > 0) {
+                            console.log("All other equipment must at least have the same amount of slots as the base.");
+                            ready = false;
+                            break;
+                        }
+                    }
+                }
+                if (ready) {
+                    console.log("Can Affix!");
+                    for (j=0; j<stage.length; j++) {
+                        if (stage[j].slots > 0) {
+                            for (k=0; k<stage[j].slots; k++) {
+                                var currentAbility = stage[j].abilities[k];
+                                if (!abilityMap[currentAbility.id]) {
+                                    abilityMap[currentAbility.id] = 1;
+                                }
+                                else {
+                                    abilityMap[currentAbility.id] += 1;
+                                }
+                                if (currentAbility.abilityType.includes("soul")) {
+                                    if (!soulMap[currentAbility.id]) {
+                                        soulMap[currentAbility.id] = 1;
+                                    }
+                                    else {
+                                        soulMap[currentAbility.id] += 1;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    console.log(abilityMap);
+
+                    /** TODO : Create algorithm to calculate "true" ability success rates and extra ability creation */
+                    for (var id in abilityMap) {
+                        var ability = abilities[id-1];
+                        var actualRate = 0;
+                        var newRate = 0;
+                        var splitName = ability.name.split(" ");
+                        var fusionDict = {};
+
+                        /** Specific checks for increased success rates */
+
+                        /**Individuals*/
+                        if (ability.name.includes("Modulator")) {
+                            if (abilityMap[id] == 2) {
+                                actualRate = 30;
+                            }
+                            else if (abilityMap[id] > 2) {
+                                actualRate = 80;
+                            }
+                        }
+                        else if (ability.name.includes("Stigma") || ability.name.includes("Vinculum") || ability.name.includes("ARKS MAX")) {
+                            if (abilityMap[id] == 2) {
+                                actualRate = 30;
+                            }
+                            else if (abilityMap[i] > 2) {
+                                actualRate = 50;
+                            }
+                        }
+
+                        else if (ability.name.includes("Flict") || ability.name.includes("Alter")) {
+                            if (abilityMap[id] > 2) {
+                                actualRate = 80;
+                            }
+                        }
+
+                        else if (ability.abilityType.includes("soul")) {
+                            if (abilityMap[id] == 2) {
+                                actualRate = 50;
+                            }
+                            else if (abilityMap[id] > 2) {
+                                actualRate = 80;
+                            }
+                        }
+
+                        else if (ability.name.includes("Mutation") || ability.name.includes("Doom Break")) {
+                            if (abilityMap[id] == 2) {
+                                actualRate = 50;
+                            }
+                            else if (abilityMap[id] > 2) {
+                                actualRate = 80;
+                            }
+                        }
+
+                        else if (ability.abilityType.includes("basic") || ability.abilityType.includes("resist") || ability.abilityType.includes("status")) {
+                            if (abilityMap[id] == 2) {
+                                actualRate = 20;
+                                fusionDict[abilities[id].name] = abilities[id].successRate;
+                            }
+                            else if (abilityMap[id] > 2) {
+                                actualRate = 40;
+                                fusionDict[abilities[id].name] = abilities[id].successRate + 20;
+                            }
+                        } /** End of individual checks */
+
+
+                        /** Soul bonus check */
+                        for (var soulId in soulMap) {
+                            if (abilities[soulId-1].boost.includes(splitName[0])) {
+                                actualRate += 20
+                                break;
+                            }
+                        }
+
+                        newRate = ability.successRate + actualRate;
+
+                        /**Overall success rate cannot exceed 100% */
+                        if (newRate > 100) {
+                            newRate = 100;
+                        }
+
+                        console.log(newRate);
+
+                        if (newRate > 0 || ability.successRate > 0) {
+
+                            $("#pot-affix").append("<tr><span><td>" + abilities[id-1].name + "</td><td>" + "---" + newRate +
+                                                    "%" + "</td><td>---<input value='" + id +
+                                                    "' type='checkbox' /></td></span></tr>");
+
+                            if (fusionDict) {
+                                for (var name in fusionDict) {
+                                    $("#pot-affix").append("<tr><span><td>" + name + "</td><td>" + "---" + fusionDict[name] +
+                                                    "%" + "</td><td>---<input value='" + id +
+                                                    "' type='checkbox' /></td></span></tr>");
+                                }
+                            }
+                        }
+                    } // end for
+                }
+            }
+        });
+    });
+
+    //]]>
+    </script>
 
 </head>
 <body>

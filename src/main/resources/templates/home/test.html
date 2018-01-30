@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org/">
+
+<head>
+    <title th:text="${title}"></title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"
+          integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous"/>
+    <link rel="stylesheet" th:href="@{/css/custom.css}"/>
+    <link type="text/javascript" th:href="@{/js/custom.js}"/>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+            integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"
+            integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh"
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"
+            integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ"
+            crossorigin="anonymous"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script th:src="@{/js/custom.js}"></script>
+    <script th:inline="javascript">
+    //<![CDATA[
+        $(document).ready(function(){
+            var base = [[${base}]];
+            var abilities = [[${abilities}]];
+
+            $("#basic, #special, #soul, #resist, #status, #other").dblclick(function() {
+                var abilityTypeElement = document.getElementById(this.id);
+                var ability = abilityTypeElement.options[abilityTypeElement.selectedIndex].value;
+                if(base.abilities.length < 8) {
+                    for (var i=0; i<abilities.length; i++) {
+                        if (ability == abilities[i].name) {
+                            base.abilities.push(abilities[i]);
+                            base.slots += 1;
+                        }
+                    }
+                }
+
+                for (var j=0; j< base.abilities.length; j++) {
+                    $("#base-abilities").remove();
+                    $("#base-abilities").replaceWith("<p>" + base.abilities[j].name + "</p>");
+                }
+                console.log(base);
+            });
+
+        });
+    //]]>
+    </script>
+</head>
+<body>
+<div th:replace="fragments :: navigation" style="position: fixed;"></div>
+
+<div class="container-fluid" id="header">
+    <h1 class="display-2" style="text-shadow:.7px 1.4px teal">PSO2 Affix Simulator</h1>
+</div>
+
+<div class="col-xs-12" style="height:25px;">
+    <!-- Empty Space -->
+</div>
+
+
+<div class="container-fluid" style="max-height:60px;" id="stage-header">
+
+    <h2 class="display-4" style="font-size:40px; text-shadow:.7px 1.4px teal; text-align:center;">Stage</h2>
+
+</div>
+
+<!--TODO: INCLUDE EQUIPMENT OBJECTS IN EACH EQUIPMENT DIV -->
+<div id="stage" class="container-fluid">
+    <div th:each="equipment : ${stage.stage}" th:id="${equipment.identifier}" class="col-sm-2 equipment">
+
+        <h2 class="equipment-header" th:text="${equipment.title}"></h2>
+
+        <div class="justify-content-around">
+            <button th:id="'add-' + ${equipment.identifier}" class="btn">Add</button>
+            <button th:id="'clear-' + ${equipment.identifier}" class="btn">Clear</button>
+            <button th:id="'junk-' + ${equipment.identifier}" class="btn">Junk</button>
+        </div>
+
+    </div>
+</div>
+
+<div id="search" style="margin-left: 245px;color: darkgray; background-color: 2a515b;display: none; width: 83%; height: 500px;">
+    <h2 style="text-align: center;">Choose Abilities</h2>
+    <br />
+    <div class="column">
+        <h5 class="ability-header">Basic</h5>
+        <select size="10" id="basic">
+            <option class="ability"
+                    th:each="ability : ${basic}"
+                    th:id="${ability.id}"
+                    th:value="${ability.name}"
+                    th:text="${ability.name}"></option>
+        </select>
+    </div>
+    <div class="column">
+        <h5 class="ability-header">Special</h5>
+        <select multiple="multiple" id="special" size="10">
+            <option th:each="ability : ${special}"
+                    th:value="${ability.name}"
+                    th:text="${ability.name}"></option>
+        </select>
+    </div>
+    <div class="column">
+        <h5 class="ability-header">Souls</h5>
+        <select multiple="multiple" id="soul" size="10">
+            <option th:each="ability : ${soul}"
+                    th:value="${ability.name}"
+                    th:text="${ability.name}"></option>
+        </select>
+    </div>
+    <div class="column">
+        <h5 class="ability-header">Resists</h5>
+        <select multiple="multiple" id="resist" size="10">
+            <option th:each="ability : ${resist}"
+                    th:value="${ability.name}"
+                    th:text="${ability.name}"></option>
+        </select>
+    </div>
+    <div class="column">
+        <h5 class="ability-header">Status Effects</h5>
+        <select multiple="multiple" id="status" size="10">
+            <option th:each="ability : ${status}"
+                    th:value="${ability.name}"
+                    th:text="${ability.name}"></option>
+        </select>
+    </div>
+    <div class="column">
+        <h5 class="ability-header">Other</h5>
+        <select multiple="multiple" id="other" size="10">
+            <option th:each="ability : ${other}"
+                    th:value="${ability.name}"
+                    th:text="${ability.name}"></option>
+        </select>
+    </div>
+</div>
+
+
+</body>
+</html>

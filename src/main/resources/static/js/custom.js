@@ -197,6 +197,9 @@ $(document).ready(function(){
             $("#affix-header-cont").animate({bottom: 1500});
             $("#stage").delay(600).fadeToggle();
             $("#pot-affix").empty();
+            $("#pass").empty();
+            $("#fail").empty();
+            $("#final").empty();
         }
 
     });

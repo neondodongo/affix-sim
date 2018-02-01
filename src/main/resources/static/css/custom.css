@@ -5,12 +5,19 @@ body {
 }
 select {
     width: 160px;
+    background-color: #4b7582;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #81d9f4;
 }
 
-tr{
-    font-size: 20px;
+.equipment-table tr, #pot-affix>tr {
     border-bottom: solid;
     border-color: #2a8299;
+}
+
+tr {
+    font-size: 20px;
 }
 
 
@@ -49,6 +56,7 @@ tr{
 
 #affix {
     display: none;
+    width: 80%;
 }
 
 
@@ -96,8 +104,30 @@ tr{
 }
 
 #search {
-color: darkgray;
-background-color: 2a515b;
-display: none;
-height: 400px;
+    color: darkgray;
+    background-color: 2a515b;
+    display: none;
+    height: 400px;
 }
+
+#pot-affix {
+    float:left;
+    font-size: 13px;
+    width: 100%;
+}
+
+#affix-table-div {
+    overflow-y: scroll;
+    height: 350px;
+    width: 375px;
+    float: left;
+}
+
+#final {
+    width: 250px;
+}
+
+#pass, #fail {
+    width: 125px;
+}
+

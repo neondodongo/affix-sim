@@ -8,6 +8,8 @@
     var stage = [[${stage.equipment}]];
 
     $(document).ready(function(){
+        var finalAffixMap = {};
+        var penalizedAffixMap = {};
 
         $("#clear-base, #clear-e1, #clear-e2, #clear-e3, #clear-e4, #clear-e5").click(function() {
             strEquipId = $(this).parent().parent().prop("id");
@@ -132,8 +134,10 @@
         });
 
         /** Show user all transferable abilities including fusions */
-
         $("#affix-header").click(function() {
+
+            finalAffixMap = {};
+            penalizedAffixMap = {};
 
             if (affixing) {
 
@@ -219,7 +223,6 @@
                                 bonusRate = 50;
                             }
                         }
-
                         else if(ability.name.includes("Soul Catalyst")) {
                             if (abilityMap[id] == 2) {
                                 bonusRate = 10;
@@ -228,10 +231,12 @@
                                 bonusRate = 30;
                             }
                         }
-
                         else if (ability.name.includes("Flict") || ability.name.includes("Alter")) {
                             if (abilityMap[id] > 2) {
                                 bonusRate = 80;
+                            }
+                            if (abilityMap[277]) { // Extreceptor
+                                bonusRate = 100;
                             }
                         }
                         else if (ability.name.includes("Mutation") || ability.name.includes("Doom Break")) {
@@ -242,6 +247,7 @@
                                 bonusRate = 80;
                             }
                         }
+
                         else if (ability.abilityType.includes("basic") || ability.abilityType.includes("resist")) {
                             var nextAbilityId = parseInt(id) + 1;
                             /** Create fusion abilities if conditions are met */
@@ -287,6 +293,19 @@
                                 }
                                 bonusRate = 80;
                             }
+                            if (abilityMap[268]) { // Soul Receptor Bonus
+                                if (ability.name.includes("Astral")) {
+                                    bonusRate = 10;
+                                }
+                                else if (ability.name.includes("Act") || ability.name.includes("Till") ||
+                                         ability.name.includes("Magi") || ability.name.includes("Ares")) {
+                                    bonusRate = 50;
+
+                                }
+                                else {
+                                    bonusRate = 100;
+                                }
+                            }
                         }
                         else if (ability.abilityType.includes("status")) {
                             console.log("Unavailable yet");
@@ -331,6 +350,7 @@
                             /** Astral Soul */
                             transferMap[159] = 60;
                         }
+                        /** Add soul boost if applicable */
                         for (var soulId in soulMap) {
                             if (abilities[soulId-1].boost.includes(splitName[0])) {
                                 transferMap[id] += 20;
@@ -342,17 +362,149 @@
                         }
 
                     } // end BIG for
-
-                    for (var id in transferMap) {
-                        $("#pot-affix").append("<tr><span><td>" + abilities[id-1].name +
-                                               "</td><td>" + "---" + transferMap[id] +
-                                               "%" + "</td><td>---<input value='" + id +
+                    if (transferMap) {
+                        for (var id in transferMap) {
+                            $("#pot-affix").append("<tr><span><td>" + abilities[id-1].name +
+                                               "</td><td>" + transferMap[id] +
+                                               "%" + "</td><td><input id='" + id + "' class='chk' name='" +
+                                               abilities[id-1].name + "' value='" + transferMap[id] +
                                                "' type='checkbox' /></td></span></tr>");
+                        }
+                    }
+                    else {
+                        $("#pot-affix").append("<tr><td>" + "No Transferable Abilities!" + "</td></tr>");
                     }
                     console.log(transferMap);
                 }
             }
         });
+
+        $(document).on("click", ".chk", function() {
+
+            $("#final").empty();
+
+            var penalty = 0;
+            var material = 0;
+
+            if (this.checked) {
+                finalAffixMap[this.name] = this.value;
+            }
+            else {
+                delete finalAffixMap[this.name];
+            }
+
+            /** Calculate upslot penalty if applicable */
+            if (Object.keys(finalAffixMap).length > stage[0].slots) {
+                $("input:checkbox:not(:checked)").attr("disabled", "disabled");
+
+                /** Calculate num equipment */
+                for (e=1; e<stage.length; e++) {
+                    if (stage[e].slots > 0) {
+                        material++;
+                    }
+                }
+                if (stage[0].slots == 1) {
+                    if (material == 1) {
+                        penalty = .85;
+                    }
+                    else if (material > 1) {
+                        penalty = .9;
+                    }
+                }
+                else if (stage[0].slots == 2) {
+                    if (material == 1) {
+                        penalty = .75;
+                    }
+                    else if (material > 1) {
+                        penalty = .85;
+                    }
+                }
+                else if (stage[0].slots == 3) {
+                    if (material == 1) {
+                        penalty = .6;
+                    }
+                    else if (material > 1) {
+                        penalty = .7;
+                    }
+                }
+                else if (stage[0].slots == 4) {
+                    if (material == 1) {
+                        penalty = .5;
+                    }
+                    else if (material > 1) {
+                        penalty = .6;
+                    }
+                }
+                else if (stage[0].slots == 5) {
+                    if (material == 1) {
+                        penalty = .45;
+                    }
+                    else if (material > 1) {
+                        penalty = .55;
+                    }
+                }
+                else if (stage[0].slots == 6) {
+                    if (material == 1) {
+                        penalty = .35;
+                    }
+                    else if (material > 1) {
+                        penalty = .4;
+                    }
+                }
+                else if (stage[0].slots == 7) {
+                    if (material == 1) {
+                        penalty = .3;
+                    }
+                    else if (material > 1) {
+                        penalty = .35;
+                    }
+                }
+            } // end upslot calc
+
+            else {
+                $("input:checkbox:not(:checked)").removeAttr("disabled");
+            }
+
+            for (var key in finalAffixMap) {
+                if (penalty > 0) {
+                    penalizedAffixMap[key] = Math.floor(finalAffixMap[key] * penalty);
+                    $("#final").append("<tr><span><td>" + key + "</td><td>" + penalizedAffixMap[key] + "%" + "</td></span></tr>");
+                }
+                else {
+                    $("#final").append("<tr><span><td>" + key + "</td><td>" + finalAffixMap[key] + "%" + "</td></span></tr>");
+                }
+            }
+        });
+
+        $("#commit").click(function() {
+            $("#pass").empty();
+            $("#fail").empty();
+
+            if (penalizedAffixMap) {
+                for(var key in penalizedAffixMap) {
+                    var randNum = Math.floor(Math.random() * 100) + 1;
+                    if (randNum <= penalizedAffixMap[key]) {
+                        $("#pass").append("<tr><td>" + key + "</td></tr>");
+                    }
+                    else {
+                        $("#fail").append("<tr><td>" + key + "</td></tr>");
+                    }
+                }
+            }
+            else {
+                for(var key in finalAffixMap) {
+                    var randNum = Math.floor(Math.random() * 100) + 1;
+                    if (randNum <= finalAffixMap[key]) {
+                        $("#pass").append("<tr><td>" + key + "</td></tr>");
+                    }
+                    else {
+                        $("#fail").append("<tr><td>" + key + "</td></tr>");
+                    }
+                }
+            }
+
+        });
+
     });
 
     //]]>

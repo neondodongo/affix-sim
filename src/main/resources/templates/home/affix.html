@@ -61,7 +61,7 @@
             </div>
 
             <div class="container">
-            <table class="table" th:id="'table-' + ${equipment.identifier}">
+            <table class="table equipment-table" th:id="'table-' + ${equipment.identifier}">
                 <tr th:id="'0-' + ${equipment.identifier}"> </tr>
                 <tr th:id="'1-' + ${equipment.identifier}"> </tr>
                 <tr th:id="'2-' + ${equipment.identifier}"> </tr>
@@ -141,9 +141,32 @@
         <h2 id="affix-header" class="display-4">Affix</h2>
     </div>
 
-    <div id="affix">
-        <h4>Choose Abilities:</h4>
-        <table id="pot-affix"></table>
+    <div id="affix" class="container">
+        <h4 style="font-size: 40px;">Choose Abilities:</h4>
+        <table>
+            <tr class="row">
+                <td class="column" id="affix-table-div">
+                    <form>
+                        <table id="pot-affix"></table>
+                    </form>
+                </td>
+                <td class="column">
+                    <h4>Final Affix:</h4>
+                    <table id="final"></table>
+                </td>
+                <td class="column">
+                    <h4>Pass:</h4>
+                    <table id="pass">
+
+                    </table>
+                </td>
+                <td class="column">
+                    <h4>Fail:</h4>
+                    <table id="fail"></table>
+                </td>
+            </tr>
+        </table>
+        <p style="float:right;"><button id="commit" style="float:right;">You Have No Luck</button></p>
     </div>
 
 </body>

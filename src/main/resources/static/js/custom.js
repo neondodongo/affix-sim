@@ -34,6 +34,8 @@ $(document).ready(function(){
 
         } else {
             clicked = false;
+            strEquipId = null;
+            intEquipId = null;
             $("#add-base").text("Add");
             $("#search").toggle();
             $("#e1").delay(40).fadeToggle();
@@ -60,6 +62,8 @@ $(document).ready(function(){
 
         } else {
             clicked = false;
+            strEquipId = null;
+            intEquipId = null;
             $("#add-e1").text("Add");
             $("#search").toggle();
             $("#base").delay(40).fadeToggle();
@@ -86,6 +90,8 @@ $(document).ready(function(){
 
         } else {
             clicked = false;
+            strEquipId = null;
+            intEquipId = null;
             $("#add-e2").text("Add");
             $("#search").toggle();
             $("#base").delay(40).fadeToggle();
@@ -111,6 +117,8 @@ $(document).ready(function(){
 
         } else {
             clicked = false;
+            strEquipId = null;
+            intEquipId = null;
             $("#add-e3").text("Add");
             $("#search").toggle();
             $("#base").delay(40).fadeToggle();
@@ -136,6 +144,8 @@ $(document).ready(function(){
 
         } else {
             clicked = false;
+            strEquipId = null;
+            intEquipId = null;
             $("#add-e4").text("Add");
             $("#search").toggle();
             $("#base").delay(40).fadeToggle();
@@ -149,6 +159,7 @@ $(document).ready(function(){
     $("#add-e5").click(function(){
         if (!clicked) {
             clicked = true;
+            strEquipId = $(this).parent().parent().prop("id");
             intEquipId = 5;
             $("#add-e5").text("Back");
             $("#e4").delay().fadeToggle();
@@ -161,6 +172,8 @@ $(document).ready(function(){
 
         } else {
             clicked = false;
+            strEquipId = null;
+            intEquipId = null;
             $("#add-e5").text("Add");
             $("#search").toggle();
             $("#base").delay(40).fadeToggle();
@@ -183,7 +196,7 @@ $(document).ready(function(){
             $("#affix").delay(100).fadeToggle();
             $("#affix-header-cont").animate({bottom: 1500});
             $("#stage").delay(600).fadeToggle();
-            $("#pot-affix").delay(1000).empty();
+            $("#pot-affix").empty();
         }
 
     });

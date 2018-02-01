@@ -9,7 +9,30 @@
 
     $(document).ready(function(){
 
+        $("#clear-base, #clear-e1, #clear-e2, #clear-e3, #clear-e4, #clear-e5").click(function() {
+            strEquipId = $(this).parent().parent().prop("id");
 
+            for (i=0; i<stage.length; i++) {
+                if (stage[i].identifier.includes(strEquipId)) {
+                    for (j=0; j<stage[i].slots; j++) {
+                        $("#" + j + "-" + strEquipId).empty();
+                    }
+                    stage[i].abilities = [];
+                    stage[i].slots = 0;
+                    break;
+                }
+            }
+            console.log(stage[i]);
+        });
+
+        $("#basic, #special, #soul, #resist, #status, #other").keydown(function(event) {
+            if (event.which === 13) {
+                $(document.activeElement).dblclick();
+            }
+        });
+
+
+        /** Serves to properly add the selected ability to a particular equipment */
         $("#basic, #special, #soul, #resist, #status, #other").dblclick(function() {
 
             // Get selected ability
@@ -37,14 +60,16 @@
                             // Special replacement cases
                             if (currentType == "special") {
 
-                                if ((selectedAbility.name.includes("Modulator") || selectedAbility.name.includes("Vinculum") || selectedAbility.name.includes("ARKS MAX")) &&
-                                    (currentAbilities[i].name.includes("Modulator") || currentAbilities[i].name.includes("Vinculum") || currentAbilities[i].name.includes("ARKS MAX")))
+                                if ((selectedAbility.name.includes("Modulator") || selectedAbility.name.includes("Vinculum") ||
+                                     selectedAbility.name.includes("ARKS MAX")) && (currentAbilities[i].name.includes("Modulator") ||
+                                     currentAbilities[i].name.includes("Vinculum") || currentAbilities[i].name.includes("ARKS MAX")))
                                 {
                                         switchable = true;
                                         break;
                                 }
-                                else if ((selectedAbility.name.includes("Boost") || selectedAbility.name.includes("Noble") || selectedAbility.name.includes("Elegant")) &&
-                                         (currentAbilities[i].name.includes("Boost") || currentAbilities[i].name.includes("Noble") || currentAbilities[i].name.includes("Elegant")))
+                                else if ((selectedAbility.name.includes("Boost") || selectedAbility.name.includes("Noble") ||
+                                          selectedAbility.name.includes("Elegant")) && (currentAbilities[i].name.includes("Boost") ||
+                                          currentAbilities[i].name.includes("Noble") || currentAbilities[i].name.includes("Elegant")))
                                 {
                                     switchable = true;
                                     break;
@@ -106,14 +131,18 @@
             console.log(currentEquipment);
         });
 
+        /** Show user all transferable abilities including fusions */
+
         $("#affix-header").click(function() {
 
             if (affixing) {
 
-                var abilityMap = {};
-                var soulMap = {};
+                var abilityMap = {}; /** Map of all equipments' abilities (id : count) */
+                var soulMap = {}; /** Map holding all soul-type abilities (id : count) */
+                var transferMap = {}; /** Actual abilities that can be transferred (id : final rate) */
                 var ready = false;
 
+                /** Cannot affix if other equipment have less slots than base */
                 for (i=1; i<stage.length; i++) {
                     if (stage[0].slots > 0) {
                         if (stage[0].slots <= stage[i].slots || stage[i].slots == 0) {
@@ -133,9 +162,13 @@
                             break;
                         }
                     }
-                }
+                } /** End for : equip size check */
+
                 if (ready) {
+
                     console.log("Can Affix!");
+
+                    /** Populate abilityMap and soulMap */
                     for (j=0; j<stage.length; j++) {
                         if (stage[j].slots > 0) {
                             for (k=0; k<stage[j].slots; k++) {
@@ -156,113 +189,174 @@
                                 }
                             }
                         }
-                    }
+                    } // end for : populate abilityMap/soulMap
 
-                    console.log(abilityMap);
 
-                    /** TODO : Create algorithm to calculate "true" ability success rates and extra ability creation */
                     for (var id in abilityMap) {
                         var ability = abilities[id-1];
-                        var actualRate = 0;
+                        var bonusRate = 0;
                         var newRate = 0;
                         var splitName = ability.name.split(" ");
-                        var fusionDict = {};
 
                         /** Specific checks for increased success rates */
 
                         /**Individuals*/
                         if (ability.name.includes("Modulator")) {
                             if (abilityMap[id] == 2) {
-                                actualRate = 30;
+                                bonusRate = 30;
                             }
                             else if (abilityMap[id] > 2) {
-                                actualRate = 80;
+                                bonusRate = 80;
                             }
                         }
-                        else if (ability.name.includes("Stigma") || ability.name.includes("Vinculum") || ability.name.includes("ARKS MAX")) {
+                        else if (ability.name.includes("Stigma") || ability.name.includes("Vinculum") ||
+                                 ability.name.includes("ARKS MAX"))
+                        {
                             if (abilityMap[id] == 2) {
-                                actualRate = 30;
+                                bonusRate = 30;
                             }
                             else if (abilityMap[i] > 2) {
-                                actualRate = 50;
+                                bonusRate = 50;
+                            }
+                        }
+
+                        else if(ability.name.includes("Soul Catalyst")) {
+                            if (abilityMap[id] == 2) {
+                                bonusRate = 10;
+                            }
+                            else if (abilityMap[id] > 2) {
+                                bonusRate = 30;
                             }
                         }
 
                         else if (ability.name.includes("Flict") || ability.name.includes("Alter")) {
                             if (abilityMap[id] > 2) {
-                                actualRate = 80;
+                                bonusRate = 80;
                             }
                         }
-
-                        else if (ability.abilityType.includes("soul")) {
-                            if (abilityMap[id] == 2) {
-                                actualRate = 50;
-                            }
-                            else if (abilityMap[id] > 2) {
-                                actualRate = 80;
-                            }
-                        }
-
                         else if (ability.name.includes("Mutation") || ability.name.includes("Doom Break")) {
                             if (abilityMap[id] == 2) {
-                                actualRate = 50;
+                                bonusRate = 50;
                             }
                             else if (abilityMap[id] > 2) {
-                                actualRate = 80;
+                                bonusRate = 80;
                             }
                         }
-
-                        else if (ability.abilityType.includes("basic") || ability.abilityType.includes("resist") || ability.abilityType.includes("status")) {
+                        else if (ability.abilityType.includes("basic") || ability.abilityType.includes("resist")) {
+                            var nextAbilityId = parseInt(id) + 1;
+                            /** Create fusion abilities if conditions are met */
                             if (abilityMap[id] == 2) {
-                                actualRate = 20;
-                                fusionDict[abilities[id].name] = abilities[id].successRate;
+                                bonusRate = 20;
+                                if (!abilityMap[nextAbilityId] && abilities[nextAbilityId].name.includes(splitName[0])) {
+                                    if (abilities[id].name.includes("III") || abilities[id].name.includes("IV")) {
+                                        transferMap[nextAbilityId] = abilities[id].successRate / 2
+                                    }
+                                    else {
+                                       transferMap[nextAbilityId] = abilities[id].successRate;
+                                    }
+                                }
                             }
                             else if (abilityMap[id] > 2) {
-                                actualRate = 40;
-                                fusionDict[abilities[id].name] = abilities[id].successRate + 20;
+                                bonusRate = 40;
+                                if (!abilityMap[nextAbilityId] && abilities[nextAbilityId].name.includes(splitName[0])) {
+                                    if(abilities[id].name.includes("III")) {
+                                        transferMap[nextAbilityId] = (abilities[id].successRate / 2) + 20;
+                                    }
+                                    else {
+                                        transferMap[nextAbilityId] = abilities[id].successRate + 20;
+                                    }
+                                }
                             }
+                        }
+                        else if (ability.abilityType.includes("soul")) {
+                            if (abilityMap[id] == 2) {
+                                if (ability.name.includes("Toh") || ability.name.includes("Full") ||
+                                    ability.name.includes("Fabu"))
+                                {
+                                    bonusRate = 60;
+                                }
+                                else {
+                                    bonusRate = 50;
+                                }
+                            }
+                            else if (abilityMap[id] > 2) {
+                                if (ability.name.includes("Toh") || ability.name.includes("Full") ||
+                                    ability.name.includes("Fabu"))
+                                {
+                                    bonusRate = 90;
+                                }
+                                bonusRate = 80;
+                            }
+                        }
+                        else if (ability.abilityType.includes("status")) {
+                            console.log("Unavailable yet");
                         } /** End of individual checks */
 
-
-                        /** Soul bonus check */
-                        for (var soulId in soulMap) {
-                            if (abilities[soulId-1].boost.includes(splitName[0])) {
-                                actualRate += 20
-                                break;
-                            }
-                        }
-
-                        newRate = ability.successRate + actualRate;
+                        newRate = ability.successRate + bonusRate;
 
                         /**Overall success rate cannot exceed 100% */
                         if (newRate > 100) {
                             newRate = 100;
                         }
-
-                        console.log(newRate);
-
                         if (newRate > 0 || ability.successRate > 0) {
+                            transferMap[ability.id] = newRate;
+                        }
 
-                            $("#pot-affix").append("<tr><span><td>" + abilities[id-1].name + "</td><td>" + "---" + newRate +
-                                                    "%" + "</td><td>---<input value='" + id +
-                                                    "' type='checkbox' /></td></span></tr>");
+                        /** Fusion soul creation */
+                        if (soulMap[102] || soulMap[103] || soulMap[104] || soulMap[106] || soulMap[113] ||
+                            soulMap[126] || soulMap[129] || soulMap[131] || soulMap[134] || soulMap[138] ||
+                            soulMap[139] || soulMap[144] || soulMap[150])
+                        {
+                            if (soulMap[160] || soulMap[161] || soulMap[162] || soulMap[163]) {
+                                /**  Act, Till, Magi, Ares the Soul */
+                                transferMap[166] = 70;
+                                transferMap[167] = 70;
+                                transferMap[168] = 70;
+                                transferMap[169] = 70;
 
-                            if (fusionDict) {
-                                for (var name in fusionDict) {
-                                    $("#pot-affix").append("<tr><span><td>" + name + "</td><td>" + "---" + fusionDict[name] +
-                                                    "%" + "</td><td>---<input value='" + id +
-                                                    "' type='checkbox' /></td></span></tr>");
-                                }
                             }
                         }
-                    } // end for
+                        if ((soulMap[160] && (soulMap[161] || soulMap[162])) ||
+                            (soulMap[161] && (soulMap[160] || soulMap[162])) ||
+                            (soulMap[162] && (soulMap[160] || soulMap[161])))
+                        {
+                            /** Ether Soul */
+                            transferMap[165] = 10;
+                        }
+                        if (soulMap[120] && soulMap[135] && soulMap[146] && soulMap[154] && soulMap[157]) {
+                            /** Soul Catalyst */
+                            transferMap[270] = 10;
+                        }
+                        if (abilityMap[270] > 2 && soulMap[158] > 0) {
+                            /** Astral Soul */
+                            transferMap[159] = 60;
+                        }
+                        for (var soulId in soulMap) {
+                            if (abilities[soulId-1].boost.includes(splitName[0])) {
+                                transferMap[id] += 20;
+                                if (transferMap[id] > 100) {
+                                    transferMap[id] = 100;
+                                }
+                                break;
+                            }
+                        }
+
+                    } // end BIG for
+
+                    for (var id in transferMap) {
+                        $("#pot-affix").append("<tr><span><td>" + abilities[id-1].name +
+                                               "</td><td>" + "---" + transferMap[id] +
+                                               "%" + "</td><td>---<input value='" + id +
+                                               "' type='checkbox' /></td></span></tr>");
+                    }
+                    console.log(transferMap);
                 }
             }
         });
     });
 
     //]]>
-    </script>
+</script>
 
 </head>
 <body>

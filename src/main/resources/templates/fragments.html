@@ -10,6 +10,7 @@
     $(document).ready(function(){
         var finalAffixMap = {};
         var penalizedAffixMap = {};
+        var material = 0;
 
         $("#clear-base, #clear-e1, #clear-e2, #clear-e3, #clear-e4, #clear-e5").click(function() {
             strEquipId = $(this).parent().parent().prop("id");
@@ -107,6 +108,8 @@
                         }
 
                     } //end for
+
+                        /** Switch or Add ability to equipment */
 
                         if (switchable) {
                             currentAbilities[i] = selectedAbility;
@@ -362,11 +365,11 @@
                         }
 
                     } // end BIG for
-                    if (transferMap) {
+                    if (Object.keys(transferMap).length > 0) {
                         for (var id in transferMap) {
                             $("#pot-affix").append("<tr><span><td>" + abilities[id-1].name +
                                                "</td><td>" + transferMap[id] +
-                                               "%" + "</td><td><input id='" + id + "' class='chk' name='" +
+                                               "%" + "</td><td><input id='" + abilities[id-1].name + "' class='chk' name='" +
                                                abilities[id-1].name + "' value='" + transferMap[id] +
                                                "' type='checkbox' /></td></span></tr>");
                         }
@@ -379,19 +382,39 @@
             }
         });
 
+        /**
+        *   TODO: Prevent adding abilities of the same "string literal" at different tiers
+        *         i.e. Power I and Power II
+        *
+        */
+
         $(document).on("click", ".chk", function() {
 
             $("#final").empty();
+            $("#pass").empty();
+            $("#fail").empty();
 
             var penalty = 0;
-            var material = 0;
 
             if (this.checked) {
+                if (Object.keys(finalAffixMap).length > 0) {
+                    for (var key in finalAffixMap) {
+                        if (key.split(" ")[0].includes(this.name.split(" ")[0]) || key.includes(this.name)) {
+                            document.getElementById(key).checked = false;
+                            delete finalAffixMap[key];
+                        }
+                    }
+                }
                 finalAffixMap[this.name] = this.value;
             }
             else {
+                if (Object.keys(penalizedAffixMap).length > 0) {
+                    delete penalizedAffixMap[this.name];
+                }
                 delete finalAffixMap[this.name];
             }
+
+            console.log(finalAffixMap);
 
             /** Calculate upslot penalty if applicable */
             if (Object.keys(finalAffixMap).length > stage[0].slots) {
@@ -480,7 +503,7 @@
             $("#pass").empty();
             $("#fail").empty();
 
-            if (penalizedAffixMap) {
+            if (Object.keys(penalizedAffixMap).length > 0) {
                 for(var key in penalizedAffixMap) {
                     var randNum = Math.floor(Math.random() * 100) + 1;
                     if (randNum <= penalizedAffixMap[key]) {

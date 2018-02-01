@@ -124,7 +124,8 @@ tr {
 }
 
 #final {
-    width: 250px;
+    width: 210px;
+    min-height:300px;
 }
 
 #pass, #fail {

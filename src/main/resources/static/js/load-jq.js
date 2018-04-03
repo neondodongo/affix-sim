@@ -8,16 +8,9 @@ var affixing = false;
 
 $(document).ready(function(){
 
-    $("#header").slideToggle(600);
-    $("#stage-header-cont").slideToggle(900);
-    $("#base").delay(300).fadeToggle();
-    $("#e1").delay(425).fadeToggle();
-    $("#e2").delay(550).fadeToggle();
-    $("#e3").delay(675).fadeToggle();
-    $("#e4").delay(800).fadeToggle();
-    $("#e5").delay(925).fadeToggle();
-    $("#affix-header-cont").delay(1050).fadeToggle();
-    $("#click-me").delay(1200).fadeToggle();
+
+
+
 
      $("#add-base").click(function(){
         if (!clicked) {
@@ -204,4 +197,4 @@ $(document).ready(function(){
 
     });
 
-});
+})

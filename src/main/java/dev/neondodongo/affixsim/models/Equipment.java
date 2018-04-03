@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class Equipment {
 
     private ArrayList<Ability> abilities;
-    private Ability specialAbilityFactor;
+    private SpecialAbilityFactor specialAbilityFactor;
     private String title;
     private String identifier;
     private int slots;
@@ -24,12 +24,8 @@ public class Equipment {
         return abilities;
     }
 
-    public Ability getSpecialAbilityFactor() {
+    public SpecialAbilityFactor getSpecialAbilityFactor() {
         return specialAbilityFactor;
-    }
-
-    public void setSpecialAbilityFactor(Ability specialAbilityFactor) {
-        this.specialAbilityFactor = specialAbilityFactor;
     }
 
     public int getSlots() {

@@ -24,7 +24,6 @@ public class Ability {
 
     private String boost;
 
-
     public Ability(){}
 
 
@@ -55,13 +54,6 @@ public class Ability {
 
     public int getSuccessRate() {
         return successRate;
-    }
-
-    public void addSuccessRate(int bonus) {
-        successRate += bonus;
-        if (successRate > 100) { //Success rate cannot exceed 100%
-            successRate = 100;
-        }
     }
 
     public String getBoost() {

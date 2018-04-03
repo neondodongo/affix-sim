@@ -1,8 +1,10 @@
 package dev.neondodongo.affixsim.controllers;
 
 import dev.neondodongo.affixsim.models.Ability;
+import dev.neondodongo.affixsim.models.SpecialAbilityFactor;
 import dev.neondodongo.affixsim.models.data.AbilityDao;
 import dev.neondodongo.affixsim.models.Stage;
+import dev.neondodongo.affixsim.models.data.SpecialAbilityFactorDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,6 +20,9 @@ public class AffixController {
     @Autowired
     private AbilityDao abilityDao;
 
+    @Autowired
+    private SpecialAbilityFactorDao safDao;
+
     @RequestMapping(value="affix")
     public String showSimulator(Model model) {
         ArrayList<Ability> basic = new ArrayList<>();
@@ -28,6 +33,10 @@ public class AffixController {
         ArrayList<Ability> status = new ArrayList<>();
         ArrayList<Ability> other = new ArrayList<>();
 
+        ArrayList<SpecialAbilityFactor> saf = new ArrayList<>();
+        saf.add(new SpecialAbilityFactor(0,"None", 0));
+
+        Stage stage = new Stage();
 
         for (Ability ability : abilityDao.findAll()) {
             if (ability.getAbilityType().equals("basic")) {
@@ -53,6 +62,10 @@ public class AffixController {
             }
         }
 
+        for (SpecialAbilityFactor factor : safDao.findAll()) {
+            saf.add(factor);
+        }
+
         model.addAttribute("title", "PSO2 Affix Simulator");
         model.addAttribute("basic", basic);
         model.addAttribute("special", special);
@@ -62,8 +75,8 @@ public class AffixController {
         model.addAttribute("other", other);
         model.addAttribute("fever", fever);
         model.addAttribute("abilities", abilityDao.findAll());
-
-        Stage stage = new Stage();
+        model.addAttribute("factors", safDao.findAll());
+        model.addAttribute("saf", saf);
         model.addAttribute("stage", stage);
 
         return "home/affix";

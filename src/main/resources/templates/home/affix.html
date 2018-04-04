@@ -160,10 +160,14 @@
     <div id="affix" class="container">
         <div style="display: inline;">
             <h1>Choose Abilities:</h1>
-            <p style="float:right;"><button style="height: 55px;" id="commit">You Have No Luck</button></p>
+            <p style="display: block;float:right;">
+                <button style="height: 55px;" id="commit">You Have No Luck</button>
+                <p style="float: right;display: block; font-size: 18px; padding-right: 20px;" id="total-passes">Total Passes: 10/10</p>
+            </p>
+
         </div>
         <h4 style="float: left;" id="ability-counter"></h4>
-        <h4 id="upslot-penalty" style="color: darkred; padding-left: 135px; display:block; visibility:hidden;">Upslot Penalty!</h4>
+        <h4 id="upslot-penalty" style="color: darkred; padding-left: 135px; display:block; visibility:hidden;">Upslot Penalty Applied!</h4>
         <table>
             <tr class="row">
                 <td class="column" id="affix-table-div">
@@ -206,9 +210,6 @@
                                 </option>
                             </select>
                         </p>
-                    </div>
-                    <div id="success-item-div">
-
                     </div>
                 </td>
                 <td class="column result">

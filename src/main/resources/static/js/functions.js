@@ -53,8 +53,9 @@
         $("#e5").delay(750).fadeToggle();
         $("#affix-header-cont").delay(1050).fadeToggle();
         $("#commit").attr("disabled", "disabled");
-        $("#sr-bonus").val(0);
+        $("#sr-item").val(0);
         $("#same-eq").val(0);
+        $("#total-passes").css("visibility", "hidden");
     }
 
 
@@ -561,7 +562,9 @@
             for (var key in myAffix) {
                 if (key == name || (key.includes("Soul", 4) && name.includes("Soul", 4)) ||
                     key.split(" ")[0].includes(name.split(" ")[0]) ||
-                    (["Modulator", "Vinculum", "ARKS MAX"].includes(key) && ["Modulator", "Vinculum", "ARKS MAX"].includes(name)))
+                    (["Modulator", "Vinculum", "ARKS MAX"].includes(key) &&
+                     ["Modulator", "Vinculum", "ARKS MAX"].includes(name)) ||
+                     (["Flict", "Alter"].includes(key.split(" ")[0]) && ["Flict", "Alter"].includes(name.split(" ")[0])))
                 {
                     document.getElementById(key).checked = false;
                     delete myAffix[key];
@@ -654,15 +657,23 @@
 
     function renderResult(finalAffix) {
         var randNum = null;
+        var counter = 0;
         for (var key in finalAffix) {
             //Generate random number for each key
             randNum = Math.floor(Math.random() * 100) + 1;
             if (randNum <= finalAffix[key]) {
+                counter++;
                 $("#pass").append("<tr style='border-bottom: solid; border-color: #81d9f4; font-size: 18px;'><td>" + key + "</td><td>" + finalAffix[key] + "%" + "</td></tr>");
             }
             else {
                 $("#fail").append("<tr style='border-bottom: solid; border-color: #81d9f4; font-size: 18px;'><td>" + key + "</td><td>" + finalAffix[key] + "%" + "</td></tr>");
             }
+        }
+        if (counter == Object.keys(finalAffix).length) {
+            return true;
+        }
+        else {
+            return false;
         }
     }
 

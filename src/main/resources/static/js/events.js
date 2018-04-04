@@ -5,12 +5,15 @@ $(document).ready(function(){
         var intEquipId = null;
         var adding = false;
         var affixing = false;
+        var passed = false; // Initialize complete pass bool for affix
+        var commitCount = 0; // Initialize counter for commit button clicks
+        var passedCount = 0; // Initialize counter for complete passes
         var affixableAbilities = []; // List for Ability objects
         var abilityMap = {}; /** Map of all equipments' abilities (abilityId : count) */
         var soulMap = {}; /** Map holding all equipments' soul-type abilities (abilityId : ability) */
         var safList = []; /** List of all selected SpecialAbilityFactor objects */
         var myAffix = {}; /** Map of Ability objects to transfer (abilityName : successRate) */
-        var myAffixBoosted = {};
+        var myAffixBoosted = {}; /** Map to hold altered myAffix with success rate boosts */
 
         onPageLoad();
         setSafs(stage, safs);
@@ -91,12 +94,12 @@ $(document).ready(function(){
 
         /** Show user all transferable abilities including fusions */
         $("#affix-header").click(function() {
-            //Empty any previous map population
-            affixableAbilities = []; // Empty array for Ability objects
+            //Empty any previous populations
+            affixableAbilities = [];
             myAffix = {};
-            abilityMap = {}; /** Dict of all equipments' abilities (abilityId : count) */
-            soulMap = {}; /** Dict holding all equipments' soul-type abilities (abilityId : ability) */
-            safList = []; /** List of all selected SpecialAbilityFactor objects */
+            abilityMap = {};
+            soulMap = {};
+            safList = [];
 
             /** Cannot affix if other equipment have less slots than base */
             if (equipSizeCheck(stage)) {
@@ -108,17 +111,22 @@ $(document).ready(function(){
                 $(".result").css("visibility", "hidden");
                 $("#commit").attr("disabled", "disabled");
                 $("#commit").css("opacity", "0.4");
-                $("#sr-bonus").val(0);
-                $("#same-eq").val(0);                
+                $("#sr-item").val(0);
+                $("#same-eq").val(0);
 
 
                 if (affixing) {
-                    /** Populate abilityMap/soulMap/safMap */
+                    myAffix = {};
+                    myAffixBoosted = {};
+
                     abilityMap = getSelectedAbilities(stage, abilities);
+
                     console.log("Selected Abilities: ");
                     console.log(abilityMap);
+
                     safList = getSAFs(stage);
                     soulMap = getSouls(abilityMap, abilities);
+
                     console.log("Selected SAFs: ");
                     console.log(safList);
 
@@ -152,6 +160,7 @@ $(document).ready(function(){
                     delete myAffix[this.name];
                 }
                 if (Object.keys(myAffix).length == stage[0].slots) {
+                    myAffixBoosted = {};
                     $("#upslot-penalty").css("visibility", "hidden");
                     $("input:checkbox:not(:checked)").removeAttr("disabled");
                     $("input:checkbox:not(:checked)").parent().parent().css("opacity", "1");
@@ -175,9 +184,14 @@ $(document).ready(function(){
                     $(".result").css("visibility", "hidden");
                 }
             }
+            $("#same-eq").val(0);
+            $("#sr-item").val(0);
             $("#same-eq-div").css("opacity", "1");
             $("#ability-counter").empty();
-            $("#ability-counter").text("Selected: " + Object.keys(myAffix).length + "/" + stage[0].slots)
+            $("#ability-counter").text("Selected: " + Object.keys(myAffix).length + "/" + stage[0].slots);
+            $("#total-passes").empty();
+            passedCount = 0;
+            commitCount = 0;
             myAffix = calcUpslotPenalty(myAffix, stage, equipCount, affixableAbilities);
             renderFinalAffix(myAffix);
         });
@@ -186,15 +200,32 @@ $(document).ready(function(){
         $("#commit").click(function() {
             $("#pass").empty();
             $("#fail").empty();
+            $("#total-passes").empty();
+            $("#total-passes").css("visibility", "visible");
             $(".result").css("visibility", "visible");
-            renderResult(myAffixBoosted);
+            commitCount++;
+            if (Object.keys(myAffixBoosted).length > 0) {
+                passed = renderResult(myAffixBoosted);
+            }
+            else {
+                passed = renderResult(myAffix);
+            }
+            if (passed) {
+                passedCount++;
+            }
+            // Render total passes to page
+            $("#total-passes").text("Total Passes: " + passedCount + "/" + commitCount + " (" + ((passedCount / commitCount) * 100).toFixed(2) + "%)");
         });
 
         $("#same-eq, #sr-item").change(function() {
             $("#final").empty();
+            $("#total-passes").empty();
+            passedCount = 0;
+            commitCount = 0;
             var srBonus = parseInt($("#sr-item").val());
             var sameEq = parseInt($("#same-eq").val());
 
+            //Requires copy of myAffix object for usage of original, calculated success rates
             myAffixBoosted = Object.assign({}, myAffix);
 
             for (var key in myAffixBoosted) {
